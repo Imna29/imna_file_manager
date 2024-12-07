@@ -1,13 +1,13 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Imna File Manager",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "identifier": "manager.digital.imna",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "npm dev",
-    "beforeBuildCommand": "npm generate"
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run generate"
   },
   "app": {
     "windows": [
