@@ -6,8 +6,8 @@
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "bun dev",
-    "beforeBuildCommand": "bun generate"
+    "beforeDevCommand": "npm dev",
+    "beforeBuildCommand": "npm generate"
   },
   "app": {
     "windows": [
