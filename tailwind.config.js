@@ -1,3 +1,5 @@
-module.exports = {
-    plugins: [require('tailwindcss-primeui')]
+import tailwindcss from 'tailwindcss-primeui'
+
+export default {
+    plugins: [tailwindcss]
 };
