@@ -21,7 +21,7 @@ const itemWidth = 9 * parseFloat(getComputedStyle(document.documentElement).font
 const {width, height} = useElementSize(containerRef)
 
 const numItemsPerRow = computed(() =>
-    Math.floor(width.value / itemWidth)
+    Math.max(Math.floor(width.value / itemWidth), 1)
 );
 
 // Convert items to rows for grid layout
@@ -39,8 +39,8 @@ const rows = computed(() => {
 async function loadDirectory(path: string) {
   try {
     isLoading.value = true;
-    const items: DirectoryItem[] = await invoke('get_directory_content', {directory: path});
-    console.log("loaded");
+    let items: DirectoryItem[] = await invoke('get_directory_content', {directory: path});
+
     const sortedItems = items.sort((a, b) => {
       if (a.isDir && !b.isDir) return -1;
       if (!a.isDir && b.isDir) return 1;
@@ -93,6 +93,9 @@ function handleKeyNavigation(e: KeyboardEvent) {
     case 'ArrowDown':
       selectedIndex.value = Math.min(currentIdx + numItemsPerRow.value, itemsRef.value.length - 1);
       break;
+    case ' ':
+      itemsRef.value[currentIdx].isSelected = !itemsRef.value[currentIdx].isSelected;
+      break;
   }
 
   if (selectedIndex.value !== currentIdx) {
@@ -107,57 +110,33 @@ watchEffect(() => {
   loadDirectory(props.directory);
 });
 
-const menuItems = useRoute().path === "/" ? [{label:""}] : useRoute().path.split('/').map((item) => {
-  return {
-    label: item,
-  }
-});
 
-function navigateToPathFromMenu(path: string) {
-  const allPaths = useRoute().path.split('/');
-  const newPath = allPaths.slice(0, allPaths.indexOf(path) + 1).join('/');
-  emit('navigate', newPath || '/');
-}
 </script>
 
 <template>
-  <div class="flex flex-col">
-    <div>
-      <Breadcrumb :model="menuItems">
-        <template #item="{item}">
-          <div v-if="item.label!==''" class="cursor-pointer" @click="navigateToPathFromMenu(item.label as string)">
-            {{ item.label }}
-          </div>
-          <div v-else>
-            <Icon name="solar:home-outline" class="cursor-pointer" @click="navigateToPathFromMenu('')"
-            ></Icon>
+  <div ref="containerRef" class="w-full flex-1 p-4" @keydown="handleKeyNavigation" role="grid" tabindex="0"
+       @keyup.enter="handleOpen(itemsRef[selectedIndex].item)">
+    <template v-if="isLoading">
+      <div class="w-full text-center">Loading...</div>
+    </template>
+    <template v-else>
+      <VirtualScroller :items="rows" :itemSize="[112, itemWidth]" orientation="both" class="h-dvh w-full"
+                       :scrollHeight="height + 'px'" :scrollWidth="width + 'px'" :autoSize="true">
+        <template v-slot:item="{ item, options }">
+          <div :class="['flex items-center p-2', { 'bg-surface-100 dark:bg-surface-700': options.odd }]"
+               style="height: 112px">
+            <template v-for="(el, index) of item" :key="index">
+              <div :style="{ width: `${itemWidth}px`, height: '112px' }" class="flex items-center justify-center">
+                <DirectoryItemComponent :item="el.item" :isSelected="el.isSelected" class="w-full h-full "
+                                        :class="{'border-b-4' : options.index * numItemsPerRow + index === selectedIndex}"
+                                        @select="(multiSelect) => handleSelect(el.item, multiSelect, options.index * numItemsPerRow + index)"
+                                        @open="handleOpen"/>
+              </div>
+            </template>
           </div>
         </template>
-      </Breadcrumb>
-    </div>
-    <div ref="containerRef" class="w-full flex-1 p-4" @keydown="handleKeyNavigation" role="grid" tabindex="0"
-         @keyup.enter="handleOpen(itemsRef[selectedIndex].item)">
-      <template v-if="isLoading">
-        <div class="w-full text-center">Loading...</div>
-      </template>
-      <template v-else>
-        <VirtualScroller :items="rows" :itemSize="[112, itemWidth]" orientation="both" class="h-dvh w-dvh"
-                         :scrollHeight="height + 'px'" :scrollWidth="width + 'px'" :autoSize="true">
-          <template v-slot:item="{ item, options }">
-            <div :class="['flex items-center p-2', { 'bg-surface-100 dark:bg-surface-700': options.odd }]"
-                 style="height: 112px">
-              <template v-for="(el, index) of item" :key="index">
-                <div :style="{ width: `${itemWidth}px`, height: '112px' }" class="flex items-center justify-center">
-                  <DirectoryItemComponent :item="el.item" :isSelected="el.isSelected" class="w-full h-full"
-                                          @select="(item, multiSelect) => handleSelect(el.item, multiSelect, options.index * numItemsPerRow + index)"
-                                          @open="handleOpen"/>
-                </div>
-              </template>
-            </div>
-          </template>
-        </VirtualScroller>
-      </template>
-    </div>
+      </VirtualScroller>
+    </template>
   </div>
 </template>
 

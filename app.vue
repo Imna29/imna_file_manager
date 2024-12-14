@@ -6,7 +6,7 @@ navigateTo(await path.homeDir());
 </script>
 
 <template>
-  <div>
+  <div class="h-dvh">
     <NuxtPage/>
   </div>
 </template>
