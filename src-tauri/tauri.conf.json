@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Imna File Manager",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "identifier": "manager.digital.imna",
   "build": {
     "frontendDist": "../dist",
