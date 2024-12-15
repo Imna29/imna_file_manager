@@ -1,6 +1,6 @@
 [package]
 name = "Imna-File-Manager"
-version = "0.0.2"
+version = "0.0.3"
 description = "A file manager created by Imna Digital"
 authors = ["Imna Digital"]
 license = "Apache-2.0"
